@@ -26,7 +26,7 @@ cd $FONT_DIR
 ./install.sh
 
 sudo apt-get update
-sudo apt install zsh -y
+echo "y" | sudo apt install zsh -y
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 echo "Setting up the Spaceship theme."
