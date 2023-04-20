@@ -1,52 +1,34 @@
-export DEBIAN_FRONTEND=noninteractive
-export INSTALL_ZSH=true
-export USERNAME=`whoami`
 
-## update and install required packages
-sudo apt-get update
-sudo apt-get -y install --no-install-recommends apt-utils dialog 2>&1
-sudo apt-get install -y \
-  curl \
-  git \
-  gnupg2 \
-  jq \
-  sudo \
-  openssh-client \
-  less \
-  iproute2 \
-  procps \
-  wget \
-  unzip \
-  apt-transport-https \
-  lsb-release 
+ 
 
-# Install Azure CLI
-# echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list.d/azure-cli.list
-# curl -sL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add - 2>/dev/null
-# sudo apt-get update
-# sudo apt-get install -y azure-cli;
+#!/bin/bash
 
-# Install Jetbrains Mono font
-wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/FiraCode.zip
-sudo unzip FiraCode.zip -d /usr/share/fonts
-sudo fc-cache -f -v
 
-# Install & Configure Zsh
-if [ "$INSTALL_ZSH" = "true" ]
-then
-    sudo apt-get install -y \
-    fonts-powerline \
-    zsh
+create_symlinks() {
+    # Get the directory in which this script lives.
+    script_dir=$(dirname "$(readlink -f "$0")")
 
-    cp -f ~/dotfiles/.zshrc ~/.zshrc
-    chsh -s /usr/bin/zsh $USERNAME
-    wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
-    echo "source $PWD/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc
-fi
+    # Get a list of all files in this directory that start with a dot.
+    files=$(find -maxdepth 1 -type f -name ".*")
 
-# Cleanup
-sudo apt-get autoremove -y
-sudo apt-get autoremove -y
-sudo rm -rf /var/lib/apt/lists/*
+    # Create a symbolic link to each file in the home directory.
+    for file in $files; do
+        name=$(basename $file)
+        echo "Creating symlink to $name in home directory."
+        rm -rf ~/$name
+        ln -s $script_dir/$name ~/$name
+    done
+}
+
+create_symlinks
+
+echo "Installing fonts."
+FONT_DIR="$HOME/.fonts"
+git clone https://github.com/powerline/fonts.git $FONT_DIR --depth=1
+cd $FONT_DIR
+./install.sh
+
+echo "Setting up the Spaceship theme."
+ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
+git clone https://github.com/spaceship-prompt/spaceship-prompt.git "$ZSH_CUSTOM/themes/spaceship-prompt" --depth=1
+ln -s "$ZSH_CUSTOM/themes/spaceship-prompt/spaceship.zsh-theme" "$ZSH_CUSTOM/themes/spaceship.zsh-theme"
