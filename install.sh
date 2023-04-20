@@ -1,6 +1,3 @@
-
- 
-
 #!/bin/bash
 
 
@@ -27,6 +24,9 @@ FONT_DIR="$HOME/.fonts"
 git clone https://github.com/powerline/fonts.git $FONT_DIR --depth=1
 cd $FONT_DIR
 ./install.sh
+
+sudo apt install zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 echo "Setting up the Spaceship theme."
 ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
